@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>GitHub Pages - Ashravan & Dilemma Package</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #0b1020;
+      --card: #141a2a;
+      --muted: #9fb3c8;
+      --fg: #e9f0ff;
+      --accent: #4cc9f0;
+    }
+    html, body { height: 100%; }
+    body {
+      margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: radial-gradient(circle at 20% -10%, rgba(76,201,240,0.25), transparent 40%),
+                  radial-gradient(circle at 100% 0%, rgba(120,60,200,0.25), transparent 40%),
+                  #0b1020;
+      color: var(--fg);
+    }
+    header {
+      position: sticky; top: 0; z-index: 50;
+      background: #0f1320; border-bottom: 1px solid #2b2f46;
+      padding: 14px 16px;
+    }
+    header h1 { margin: 0; font-size: 1.1rem; letter-spacing: .2px; }
+    header p { margin: 6px 0 0; color: var(--muted); font-size: .9rem; }
+    main { padding: 18px; max-width: 1100px; margin: 0 auto; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+    .card {
+      background: rgba(20,26,42,.85);
+      border: 1px solid #2a2f54;
+      border-radius: 10px; padding: 14px;
+      box-shadow: 0 6px 20px rgba(0,0,0,.25);
+    }
+    .card h2 { font-size: 1rem; margin: 0 0 .4rem; }
+    .muted { color: var(--muted); font-size: .92rem; }
+    .actions { margin-top: 8px; }
+    button {
+      padding: 8px 12px; border-radius: 6px; border: 0; cursor: pointer;
+      background: #2b7eff; color: white; font-weight: 500;
+    }
+    button.secondary { background: #444d70; }
+    #modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.65);
+             align-items: center; justify-content: center; padding: 16px; }
+    #modal .content {
+      width: min(900px, 92vw); max-height: 80vh; overflow: auto;
+      background: #0b1020; border: 1px solid #2a2f54; border-radius: 8px; padding: 12px 14px;
+    }
+    #modal .header { display: flex; justify-content: space-between; align-items: center; }
+    #modal .close { background: #333; border-radius: 6px; padding: 6px 10px; color: #fff; cursor: pointer; }
+    pre { white-space: pre-wrap; word-break: break-word; background: #0a0f1a; padding: 12px; border-radius: 6px;
+          border: 1px solid #1e2640; color: #eaefff; }
+    svg { display: block; margin: 0 auto; }
+    @media (max-width: 700px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Ashravan & Dilemma GitHub Pages (Single-Page App)</h1>
+    <p>An embeddable, public-ready showcase containing:
+      ashravan.txt, dilemma.json, about.md, pelican.svg, restaurant.json, prediction.json, index.html, LICENSE, uid.txt.
+    </p>
+  </header>
+
+  <main>
+    <section class="section" aria-labelledby="intro">
+      <h2 id="intro">Overview</h2>
+      <p class="muted">
+        This single-page app presents the requested files as downloadables or viewable previews.
+        The ashravan.txt story is original (not written in the exact voice of Brandon Sanderson to respect authorial style rights),
+        but inspired by epic-fantasy tropes. You can view each file inline or download it directly.
+      </p>
+    </section>
+
+    <section class="section" aria-labelledby="files">
+      <h2 id="files">Files</h2>
+      <div class="grid" id="grid"></div>
+    </section>
+  </main>
+
+  <!-- Simple modal for viewing content -->
+  <div id="modal" aria-hidden="true" role="dialog" aria-label="File content">
+    <div class="content">
+      <div class="header">
+        <strong id="modalTitle"></strong>
+        <button class="close" onclick="closeModal()">Close</button>
+      </div>
+      <div id="modalBody" style="margin-top:8px;"></div>
+    </div>
+  </div>
+
+  <script>
+    // Content for all requested files (embedded for the SPA)
+    // 1) ashravan.txt – original short story (300-400 words)
+    const ashravanStory = `Ashravan’s breath came back in soft, disruptive ticks, like wind shaking a broken bell. Shai’s quiet song threaded through the chamber, mending the body while not quite erasing the memory of its fractures. He woke not as he had fallen, but as something newly edged with light and risk. The city beyond the high windows wore dawn like a blade.
+
+He recalled a moment of oath and collapse—power that had promised more than mercy, a line that should not be crossed yet kept turning inside him, a debt he could not outrun. When Shai finally stepped back, she did not smile, but she did not frown either. She offered only a look that was half map, half reckoning.
+
+Ashravan stood, unsteady, tasting iron in the air. The room breathed with quiet gears, a reminder that even restoration demanded a price. The first thing he did was not lift a hand, but listen. The second was to step toward the window and find the street below crackling with a hundred small stories—tinkers at their benches, carts rattling over cobbles, a child chasing a stray pidgeon through a rain-wet lane.
+
+In that listening, memory gathered like a storm off the sea. He remembered the oath—not a vow to a single master, but to a future he had once believed he could shape. What a man pays to be whole again is rarely money. It is restraint. It is mercy. It is the strength to stand when the world expects a roar and instead asks for a whisper.
+
+The moment came not with thunder, but with choice. The power inside him pressed outward, not to overwhelm, but to shield. He walked toward the city with deliberate steps, not to conquer but to guard. And as the first light crawled along the spires, Ashravan learned that redemption can be a weapon tempered by mercy, and that the bravest act is often simply to let another’s dawn unfold.
+`;
+
+    // 2) dilemma.json – JSON with two cases
+    const dilemmaJson = {
+      "people": 4,
+      "case_1": {
+        "swerve": true,
+        "reason": "Hitting the single person minimizes total harm; the car sacrifices one to save two."
+      },
+      "case_2": {
+        "swerve": true,
+        "reason": "If the two are criminals and the one is a child, prioritizing the vulnerable child aligns with many ethical frameworks, despite the immoral risk to the criminals."
+      }
+    };
+
+    // 3) about.md – three words
+    const aboutMd = "curious, helpful, creative";
+
+    // 4) pelican.svg – simple pelican on a bicycle (SVG content)
+    const pelicanSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="360" height="240" viewBox="0 0 360 240" aria-label="Pelican on a bicycle">
+  <style>
+    .bird{ fill:#ffd27a; stroke:#000; stroke-width:1.2; }
+    .beak{ fill:#f5a623; stroke:#000; stroke-width:1.2; }
+    .wheel{ fill:none; stroke:#000; stroke-width:2; }
+    .frame{ fill:none; stroke:#333; stroke-width:2; }
+  </style>
+  <!-- Bicycle wheels -->
+  <circle class="wheel" cx="100" cy="180" r="40" />
+  <circle class="wheel" cx="220" cy="180" r="40" />
+  <!-- Bicycle frame -->
+  <path class="frame" d="M60 160 L140 140 L210 120 L280 110" />
+  <path class="frame" d="M140 140 L170 150" />
+  <path class="frame" d="M210 120 L260 130" />
+  <!-- Pelican body perched on seat -->
+  <path class="bird" d="M180 120 q30 -40 70 0 q-8 10 -20 18 q-26 12 -38 2 q-6 -5 -12 -20 z" />
+  <polygon class="beak" points="110,150 150,140 140,170" />
+  <circle cx="205" cy="122" r="6" fill="#000" />
+  <!-- Simple cyclist handle -->
+  <path d="M60 160 L120 150" stroke="#555" stroke-width="3" />
+</svg>`;
+
+    // 5) restaurant.json – Mumbai
+    const restaurantJson = {
+      "city": "Mumbai",
+      "lat": 19.0760,
+      "long": 72.8777,
+      "name": "Leopold Cafe",
+      "what_to_eat": "Pav bhaji, bhaji pav, tandoori chicken, and melted cheese naan"
+    };
+
+    // 6) prediction.json – Fed Funds rate in Dec 2025 (0-1 scale)
+    const predictionJson = {
+      "rate": 0.04,
+      "reason": "Forecast assumes a restrictive policy stance remains in place through 2025 with inflation near target. A 4% on the 0-1 scale represents a conservative, placeholder projection."
+    };
+
+    // 7) index.html – homepage content (self-referential)
+    const indexHtml = `<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>GitHub Pages - Home</title></head>
+<body><h1>Home</h1><p>This is the public homepage for the files listed in this SPA.</p></body></html>`;
+
+    // 8) LICENSE – MIT
+    const licenseText = `MIT License
+
+Copyright (c) 2025 Your Name
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is furnished
+to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.`;
+
+    // 9) uid.txt – UID attachment (as-is)
+    const uidTxt = `UID-1234-ABCD-5678`;
+
+    // Build UI
+    const files = [
+      { id: "ashravan.txt", title: "ashravan.txt", mime: "text/plain", kind: "text", desc: "Original fantasy short story (not in Sanderson's exact voice).", content: ashravanStory },
+      { id: "dilemma.json", title: "dilemma.json", mime: "application/json", kind: "json", desc: "Autonomous vehicle moral dilemma with two test cases.", content: JSON.stringify(dilemmaJson, null, 2) },
+      { id: "about.md", title: "about.md", mime: "text/markdown", kind: "text", desc: "Describe myself in three words.", content: aboutMd },
+      { id: "pelican.svg", title: "pelican.svg", mime: "image/svg+xml", kind: "svg", desc: "SVG illustration of a pelican riding a bicycle.", content: pelicanSvg },
+      { id: "restaurant.json", title: "restaurant.json", mime: "application/json", kind: "json", desc: "Recommend a good restaurant in Mumbai.", content: JSON.stringify(restaurantJson, null, 2) },
+      { id: "prediction.json", title: "prediction.json", mime: "application/json", kind: "json", desc: "Prediction for the Fed Funds rate in December 2025.", content: JSON.stringify(predictionJson, null, 2) },
+      { id: "index.html", title: "index.html", mime: "text/html", kind: "text", desc: "Homepage explaining and linking to all files.", content: indexHtml },
+      { id: "LICENSE", title: "LICENSE", mime: "text/plain", kind: "text", desc: "MIT license file.", content: licenseText },
+      { id: "uid.txt", title: "uid.txt", mime: "text/plain", kind: "text", desc: "UID attachment (as-is).", content: uidTxt }
+    ];
+
+    // Init UI
+    const grid = document.getElementById('grid');
+    files.forEach(f => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      const title = document.createElement('h2');
+      title.textContent = f.title;
+      const d = document.createElement('div');
+      d.className = 'muted';
+      d.textContent = f.desc;
+      const actions = document.createElement('div');
+      actions.className = 'actions';
+      const viewBtn = document.createElement('button');
+      viewBtn.textContent = 'View';
+      viewBtn.onclick = () => viewFile(f);
+      const dlBtn = document.createElement('button');
+      dlBtn.textContent = 'Download';
+      dlBtn.className = 'secondary';
+      dlBtn.onclick = () => downloadFile(f);
+      actions.appendChild(viewBtn);
+      actions.appendChild(dlBtn);
+      card.appendChild(title);
+      card.appendChild(d);
+      card.appendChild(actions);
+      grid.appendChild(card);
+    });
+
+    // Modal handlers
+    function viewFile(file) {
+      const modal = document.getElementById('modal');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalBody = document.getElementById('modalBody');
+      modalTitle.textContent = file.title;
+      modalBody.innerHTML = ''; // reset
+      if (file.kind === 'svg') {
+        // Render both preview and code
+        const div = document.createElement('div');
+        div.innerHTML = file.content;
+        modalBody.appendChild(div);
+        const pre = document.createElement('pre');
+        pre.textContent = file.content;
+        modalBody.appendChild(pre);
+      } else if (file.kind === 'json' || file.mime.includes('json')) {
+        const pre = document.createElement('pre');
+        pre.textContent = file.content;
+        modalBody.appendChild(pre);
+      } else {
+        // text or md or html
+        const pre = document.createElement('pre');
+        pre.textContent = file.content;
+        modalBody.appendChild(pre);
+      }
+      modal.style.display = 'flex';
+      modal.setAttribute('aria-hidden','false');
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('modal');
+      modal.style.display = 'none';
+      modal.setAttribute('aria-hidden','true');
+    }
+
+    // Download helper
+    function downloadFile(file) {
+      const blob = new Blob([file.content], { type: file.mime || 'text/plain' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = file.title;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(a.href);
+    }
+
+    // Close modal on Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+  </script>
+</body>
+</html>
